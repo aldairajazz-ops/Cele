@@ -43,12 +43,12 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div class="vignette"></div>
 <div id="start">
   <div class="startBox">
-    <div class="tiny">Una pequeña sorpresa para ti</div>
-    <div class="tiny">(no me salio tan bien, pero es con mucho amor)</div>
-    <div class="tap">Dame un toquesito asi bien kiut ♡</div>
+    <div class="tiny">Una pequeña sorpresa para ti mi niña <33 </div>
+    <div class="tiny">(no me salio tan bien, pero es con mucho amoor)</div>
+    <div class="tap">Dame un toquesito así bien kiut ♡</div>
   </div>
 </div>
-<button id="last">Una última cosshita, dame otro toquesito asi bien kiut ♡ </button>
+<button id="last">Una última coshita... Dame otro toquesito así bien kiut ♡</button>
 <img class="side left" id="left" src="1.png" alt="">
 <img class="side right" id="right" src="1.png" alt="">
 <div id="letter">
@@ -57,7 +57,6 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <audio id="music" src="cele.mp3" preload="auto" loop></audio>
 
 <script>
-// Generador matemático de puntos de Gerbera Realista
 const GERBERA_POINTS = (() => {
   const points = [];
   const innerCount = 800;
@@ -130,34 +129,35 @@ function resize(){
 addEventListener('resize',resize);
 resize();
 
-function mask(text,size,step){
-  const q=document.createElement('canvas'),x=q.getContext('2d'),ww=Math.min(W*.8,800),hh=Math.ceil(size*1.3);
-  q.width=ww;q.height=hh;
-  x.font=`bold ${size}px Olita, Georgia, serif`;
-  x.textAlign='center';x.textBaseline='middle';
-  x.fillStyle='#fff';
-  x.fillText(text,ww/2,hh/2);
-  const d=x.getImageData(0,0,q.width,q.height).data,a=[];
-  for(let y=0;y<q.height;y+=step)
-    for(let xx=0;xx<q.width;xx+=step)
-      if(d[(y*q.width+xx)*4+3]>120)a.push({x:xx-ww/2,y:y-hh/2});
-  return a;
-}
-
 function buildC(){
-  const fontSize = Math.min(320, W * 0.55);
-  const step = Math.max(10, Math.floor(fontSize / 22));
-  const raw=mask('C', fontSize, step);
-  pts=raw.map((p,i)=>({
-    x:W/2+(Math.random()-.5)*W,
-    y:H/2+(Math.random()-.5)*H,
-    tx:p.x,
-    ty:p.y,
-    a:0,
-    delay:i/raw.length*.94,
-    word:phrases[i%phrases.length],
-    seed:Math.random()*30
-  }));
+  pts = [];
+  const radius = Math.min(W, H) * 0.22;
+  const startAngle = 0.25 * Math.PI; 
+  const endAngle = 1.75 * Math.PI;   
+  const numRings = 4;                
+  const pointsPerRing = 18;          
+  
+  let count = 0;
+  for (let r = 0; r < numRings; r++) {
+    const curR = radius - (r * 18);  
+    for (let i = 0; i < pointsPerRing; i++) {
+      const angle = startAngle + (i / (pointsPerRing - 1)) * (endAngle - startAngle);
+      const tx = Math.cos(angle) * curR;
+      const ty = Math.sin(angle) * curR;
+      
+      pts.push({
+        x: (Math.random() - 0.5) * W,
+        y: (Math.random() - 0.5) * H,
+        tx: tx,
+        ty: ty,
+        a: 0,
+        delay: (count / (numRings * pointsPerRing)) * 0.8,
+        word: phrases[count % phrases.length],
+        seed: Math.random() * 30
+      });
+      count++;
+    }
+  }
 }
 
 function drawC(progress,fade=1){
@@ -166,18 +166,18 @@ function drawC(progress,fade=1){
   const now=performance.now()/1000;
   for(const p of pts){
     const appear=clamp((progress-p.delay)/.055,0,1),e=ease(appear),tx=W/2+p.tx,ty=H/2+p.ty;
-    p.x+=(tx-p.x)*.06;
-    p.y+=(ty-p.y)*.06;
+    p.x+=(tx-p.x)*.08;
+    p.y+=(ty-p.y)*.08;
     p.a+=(fade*e-p.a)*.09;
     if(p.a<.01)continue;
-    const flick=.8+.2*Math.sin(now*3+p.seed);
+    const flick=.85+.15*Math.sin(now*3+p.seed);
     
-    ctx.font='600 11px system-ui, -apple-system, sans-serif';
+    ctx.font='700 12px system-ui, -apple-system, sans-serif';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
-    ctx.shadowBlur=8;
-    ctx.shadowColor='rgba(35,180,255,.9)';
-    ctx.fillStyle=`rgba(100,210,255,${.95*p.a*flick})`;
+    ctx.shadowBlur=10;
+    ctx.shadowColor='rgba(35,180,255,1)';
+    ctx.fillStyle=`rgba(130,220,255,${0.95*p.a*flick})`;
     ctx.fillText(p.word,p.x,p.y);
   }
   ctx.shadowBlur=0;
@@ -226,7 +226,7 @@ function setMode(m){
   if(m==='c'){buildC();makeStars(100)}
   if(m==='stars'){makeStars(230);burst()}
   if(m==='letter'){
-    ctx.clearRect(0, 0, W, H); // Limpia completamente la letra "C"
+    ctx.clearRect(0, 0, W, H);
     letter.classList.add('show');
     left.classList.add('show');
     right.classList.add('show');
