@@ -55,8 +55,60 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 </div>
 <audio id="music" src="cele.mp3" preload="auto" loop></audio>
 
-<script src="gerbera_points.js"></script>
 <script>
+// Generador matemático de puntos de Gerbera Realista
+const GERBERA_POINTS = (() => {
+  const points = [];
+  const innerCount = 800;
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < innerCount; i++) {
+    const r = Math.sqrt(i / innerCount) * 0.18;
+    const theta = i * goldenAngle;
+    points.push([r * Math.cos(theta), r * Math.sin(theta)]);
+  }
+  const discRings = 6;
+  for (let ring = 0; ring < discRings; ring++) {
+    const r = 0.18 + (ring / discRings) * 0.16;
+    const numPetals = 35 + ring * 8;
+    for (let i = 0; i < numPetals; i++) {
+      const angle = (i / numPetals) * Math.PI * 2 + (ring % 2) * 0.1;
+      const len = 0.04 + Math.random() * 0.02;
+      for (let step = 0; step < 5; step++) {
+        const pr = r + (step / 5) * len;
+        points.push([pr * Math.cos(angle), pr * Math.sin(angle)]);
+      }
+    }
+  }
+  const petalLayers = [
+    { count: 32, minR: 0.32, maxR: 0.72, width: 0.045 },
+    { count: 36, minR: 0.33, maxR: 0.88, width: 0.050 },
+    { count: 40, minR: 0.34, maxR: 1.00, width: 0.052 }
+  ];
+  petalLayers.forEach((layer, layerIdx) => {
+    const angleOffset = (layerIdx * Math.PI) / layer.count;
+    for (let i = 0; i < layer.count; i++) {
+      const baseAngle = (i / layer.count) * Math.PI * 2 + angleOffset;
+      const stepsR = 18;
+      const stepsW = 4;
+      for (let sr = 0; sr <= stepsR; sr++) {
+        const t = sr / stepsR;
+        const currentR = layer.minR + t * (layer.maxR - layer.minR);
+        const wFactor = Math.sin(t * Math.PI) * layer.width * (1 - t * 0.2);
+        for (let sw = -stepsW; sw <= stepsW; sw++) {
+          const wOffset = (sw / stepsW) * wFactor;
+          const perpAngle = baseAngle + Math.PI / 2;
+          const x = currentR * Math.cos(baseAngle) + wOffset * Math.cos(perpAngle);
+          const y = currentR * Math.sin(baseAngle) + wOffset * Math.sin(perpAngle);
+          const rx = x + (Math.random() - 0.5) * 0.008;
+          const ry = y + (Math.random() - 0.5) * 0.008;
+          points.push([rx, ry]);
+        }
+      }
+    }
+  });
+  return points;
+})();
+
 (()=>{'use strict';
 const c=document.getElementById('words'),ctx=c.getContext('2d'),fx=document.getElementById('fx'),f=fx.getContext('2d');
 const start=document.getElementById('start'),last=document.getElementById('last'),letter=document.getElementById('letter'),lt=document.getElementById('letterText'),music=document.getElementById('music'),left=document.getElementById('left'),right=document.getElementById('right'),glow=document.getElementById('glow');
@@ -221,7 +273,7 @@ async function typeLetter(){
 }
 
 function drawFlower(){
-  const cx=W/2,cy=H/2-10,scale=Math.min(W,H)*.34,total=GERBERA_POINTS.length,t0=performance.now(),dur=12000;
+  const cx=W/2,cy=H/2-10,scale=Math.min(W,H)*.38,total=GERBERA_POINTS.length,t0=performance.now(),dur=12000;
   function frame(t){
     if(mode!=='flower')return;
     const p=clamp((t-t0)/dur,0,1),count=Math.floor(total*ease(p));
