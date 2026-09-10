@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Cele 💙</title>
+<title>Para mi Cele 💙</title>
 <style>
 @font-face{font-family:Olita;src:url('olita.ttf') format('truetype');font-display:swap}
 *{box-sizing:border-box}
@@ -44,11 +44,11 @@ canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 <div id="start">
   <div class="startBox">
     <div class="tiny">Una pequeña sorpresa para ti</div>
-    <div class="tiny">no me salio tan bien, pero es con mucho amor</div>
-    <div class="tap">Dame un toquesito así bien kiut ♡</div>
+    <div class="tiny">(no me salio tan bien, pero es con mucho amor)</div>
+    <div class="tap">Dame un toquesito asi bien kiut ♡</div>
   </div>
 </div>
-<button id="last">♡ Una última cosa... toca aquí ♡</button>
+<button id="last">Una última cosshita, dame otro toquesito asi bien kiut ♡ </button>
 <img class="side left" id="left" src="1.png" alt="">
 <img class="side right" id="right" src="1.png" alt="">
 <div id="letter">
@@ -162,6 +162,7 @@ function buildC(){
 
 function drawC(progress,fade=1){
   ctx.clearRect(0,0,W,H);
+  if(fade <= 0) return;
   const now=performance.now()/1000;
   for(const p of pts){
     const appear=clamp((progress-p.delay)/.055,0,1),e=ease(appear),tx=W/2+p.tx,ty=H/2+p.ty;
@@ -171,7 +172,6 @@ function drawC(progress,fade=1){
     if(p.a<.01)continue;
     const flick=.8+.2*Math.sin(now*3+p.seed);
     
-    // Ajuste de fuente más limpia e independiente para evitar encimamiento
     ctx.font='600 11px system-ui, -apple-system, sans-serif';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
@@ -225,7 +225,13 @@ function setMode(m){
   phaseStart=performance.now();
   if(m==='c'){buildC();makeStars(100)}
   if(m==='stars'){makeStars(230);burst()}
-  if(m==='letter'){letter.classList.add('show');left.classList.add('show');right.classList.add('show');typeLetter()}
+  if(m==='letter'){
+    ctx.clearRect(0, 0, W, H); // Limpia completamente la letra "C"
+    letter.classList.add('show');
+    left.classList.add('show');
+    right.classList.add('show');
+    typeLetter();
+  }
   if(m==='flower'){letter.classList.remove('show');left.classList.remove('show');right.classList.remove('show');glow.style.opacity=1;drawFlower()}
 }
 
@@ -311,12 +317,13 @@ function drawFlower(){
 function animate(t){
   const e=(t-phaseStart)/1000;
   if(mode==='c'){
-    drawC(clamp(e/7,0,1));
-    if(e>7.6)setMode('stars');
+    drawC(clamp(e/6,0,1));
+    if(e>6.5)setMode('stars');
   }else if(mode==='stars'){
-    drawC(1,Math.max(0,1-e/1.7));
+    const fadeOut = Math.max(0, 1 - e / 1.2);
+    drawC(1, fadeOut);
     drawStars();
-    if(e>2.8)setMode('letter');
+    if(e>2.0)setMode('letter');
   }else if(mode==='letter'||mode==='last'){
     drawStars();
   }
